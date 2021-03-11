@@ -34,15 +34,15 @@ def main(args):
         help='color the data differently for different values of the given column')
     parser.add_argument('--no-color', nargs=1, action='remove_from_set', default=default_colors,
         help='do not color the data differently for different values of the given column')
-    parser.add_argument('--since', nargs=1, type=str,
+    parser.add_argument('--since', type=str,
         help='only show tests on or after the given date (parsed in natural language with parsedatetime)')
-    parser.add_argument('--note', nargs=1, type=str,
+    parser.add_argument('--note', type=str,
         help='only show tests with the given note string')
     parser.add_argument('--note-like', nargs=1, type=str,
         help='only show tests that with notes that contains the given string')
     parser.add_argument('--host', nargs='+', type=str, action='append', default=[],
         help='only show tests that ran on the machine with the given hostname(s)')
-    parser.add_argument('--save', nargs=1, type=str,
+    parser.add_argument('--save', type=str,
         help='save the plot to the given file instead of displaying it')
     parser.add_argument('testcase', nargs='+', type=str,
         help='show results for these testcases')
