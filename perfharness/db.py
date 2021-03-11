@@ -1,5 +1,6 @@
 import random
 import datetime
+from typing import Optional
 
 import sqlalchemy.ext.declarative
 import sqlalchemy.orm
