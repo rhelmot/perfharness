@@ -5,6 +5,15 @@ from typing import Optional
 import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 
+try:
+    import psycopg2
+except ImportError:
+    try:
+        from psycopg2cffi import compat
+        compat.register()
+    except ImportError:
+        pass
+
 meta = sqlalchemy.MetaData()
 Base = sqlalchemy.ext.declarative.declarative_base(metadata=meta)
 session = None  # type: Optional[sqlalchemy.orm.Session]
