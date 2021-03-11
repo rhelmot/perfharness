@@ -32,6 +32,7 @@ def main(args):
     parser = argparse.ArgumentParser(description='Run the given performance tests and record or visualize results')
     parser.add_argument('--num', '-n', type=int, default=1, help="Number of times to run each test")
     parser.add_argument('--warmup', '-w', type=int, default=0, help="Number of times to run each test before main runs")
+    parser.add_argument('--note', type=str, default="", help="Arbitrary text to associate with these runs")
     parser.add_argument('testcase', nargs='+', type=str, default=[], help="Run these tests")
 
     args = parser.parse_args(args)
@@ -60,6 +61,6 @@ def main(args):
             print("Test %d" % (i + 1))
             t = timeit(test)
             print('...time elapsed: %f sec' % t)
-            Run.record_test(basename, file_hash, t, source_hash, machine)
+            Run.record_test(basename, file_hash, t, source_hash, machine, args.note)
 
     db_close()

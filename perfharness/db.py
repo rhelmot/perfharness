@@ -28,9 +28,10 @@ class Run(Base):
     memory_size = sqlalchemy.Column(sqlalchemy.String(10))
 
     @classmethod
-    def record_test(cls, testcase, testcase_hash, runtime, codebase_hash, machine):
+    def record_test(cls, testcase, testcase_hash, runtime, codebase_hash, machine, note):
         session.add(Run(id=random.randrange(0, 100000000), runtime=runtime, timestamp=datetime.datetime.now(),
-                        testcase=testcase, testcase_hash=testcase_hash, codebase_hash=codebase_hash, **machine))
+                        testcase=testcase, testcase_hash=testcase_hash, codebase_hash=codebase_hash,
+                        note=note, **machine))
 
 
 def db_connect(config):

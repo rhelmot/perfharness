@@ -35,7 +35,15 @@ def main(args):
     parser.add_argument('--no-color', nargs=1, action='remove_from_set', default=default_colors,
         help='do not color the data differently for different values of the given column')
     parser.add_argument('--since', nargs=1, type=str,
-        help='only show time on or after the given date (parsed in natural language with parsedatetime)')
+        help='only show tests on or after the given date (parsed in natural language with parsedatetime)')
+    parser.add_argument('--note', nargs=1, type=str,
+        help='only show tests with the given note string')
+    parser.add_argument('--note-like', nargs=1, type=str,
+        help='only show tests that with notes that contains the given string')
+    parser.add_argument('--host', nargs='+', type=str, action='append', default=[],
+        help='only show tests that ran on the machine with the given hostname(s)')
+    parser.add_argument('--save', nargs=1, type=str,
+        help='save the plot to the given file instead of displaying it')
     parser.add_argument('testcase', nargs='+', type=str,
         help='show results for these testcases')
 
@@ -53,6 +61,12 @@ def main(args):
     query = ex.select([Run]).where(Run.testcase.in_([os.path.basename(t) for t in args.testcase]))
     if args.since is not None:
         query = query.where(Run.timestamp >= args.since)
+    if args.note is not None:
+        query = query.where(Run.note == args.note)
+    if args.note_like is not None:
+        query = query.where(Run.note.like(args.note_like))
+    if args.host:
+        query = query.where(Run.hostname.in_(args.host))
 
     data = pd.read_sql(query, config['database'])
     if data.empty:
@@ -85,6 +99,9 @@ def main(args):
 
         ax = data[condition].plot.scatter(x="timestamp", y="runtime", color=random_color(), label=' '.join(nameparts), ax=ax)
 
-    plt.show()
+    if args.save is None:
+        plt.show()
+    else:
+        plt.savefig(args.save)
 
     db_close()
