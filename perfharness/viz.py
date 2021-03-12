@@ -28,12 +28,9 @@ def main(args):
         return
 
     parser = argparse.ArgumentParser(description='Visualize performance results over time')
-    install_set_ops(parser)
     default_colors = {'testcase', 'hostname', 'python', 'os'}
-    parser.add_argument('--color', nargs=1, action='add_to_set', default=default_colors,
-        help='color the data differently for different values of the given column')
-    parser.add_argument('--no-color', nargs=1, action='remove_from_set', default=default_colors,
-        help='do not color the data differently for different values of the given column')
+    parser.add_argument('--color', type=str, default='testcase,python',
+        help='color the data differently for each of the given comma-separated database fields')
     parser.add_argument('--since', type=str,
         help='only show tests on or after the given date (parsed in natural language with parsedatetime)')
     parser.add_argument('--note', type=str,
@@ -74,30 +71,25 @@ def main(args):
         db_close()
         return
 
-    colorcolumns = list(default_colors)
-    colorkey = lambda row: tuple(row[col] for col in colorcolumns)
+    colorcolumns = args.color.split(',')
     colordata = data[colorcolumns].drop_duplicates()
 
-    ax = None
+    fig, ax = plt.subplots()
     for _, row in colordata.iterrows():
-        nameparts = []
-        key = colorkey(row)
         condition = None
         for col in colorcolumns:
             ok = data[col] == row[col]
             condition = ok if condition is None else ok & condition
 
+        nameparts = []
         for col in colorcolumns:
-            # if every single other row contains the same value as us,
-            # discard the attribute
-            # TODO also discard if this attribute is redundant given another attribute. maybe use a decision tree?
-            other_values = data[~condition][col].unique()
-            if len(other_values) == 1 and row[col] in other_values:
-                continue
-
             nameparts.append(row[col])
 
-        ax = data[condition].plot.scatter(x="timestamp", y="runtime", color=random_color(), label=' '.join(nameparts), ax=ax)
+        relevant_data = data[condition]
+        relevant_avg = relevant_data.set_index("timestamp")[["runtime"]].rolling(5).mean().reset_index()
+        color = random_color()
+        relevant_data.plot.scatter(x="timestamp", y="runtime", color=color, label=' '.join(nameparts), ax=ax)
+        relevant_avg.plot(x="timestamp", y="runtime", color=color, ax=ax, legend=False)
 
     if args.save is None:
         plt.show()
