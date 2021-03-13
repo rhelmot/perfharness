@@ -74,7 +74,9 @@ def main(args):
     colorcolumns = args.color.split(',')
     colordata = data[colorcolumns].drop_duplicates()
 
-    fig, ax = plt.subplots()
+    fig = plt.figure(figsize=(10, 5))
+    ax = fig.add_subplot(1, 1, 1)
+
     for _, row in colordata.iterrows():
         condition = None
         for col in colorcolumns:
@@ -89,7 +91,14 @@ def main(args):
         relevant_avg = relevant_data.set_index("timestamp")[["runtime"]].rolling(5).mean().reset_index()
         color = random_color()
         relevant_data.plot.scatter(x="timestamp", y="runtime", color=color, label=' '.join(nameparts), ax=ax)
-        relevant_avg.plot(x="timestamp", y="runtime", color=color, ax=ax, legend=False)
+        relevant_avg.plot(x="timestamp", y="runtime", color=color, ax=ax, label='_', legend=False)
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
+    ax.legend(loc="upper left", bbox_to_anchor=(1.1, 0.0, 1.0, 1.0))
+    ax.set_title("Nightly Performance")
+    ax.set_xlabel("Timestamp")
+    ax.set_ylabel("Runtime (sec)")
 
     if args.save is None:
         plt.show()
