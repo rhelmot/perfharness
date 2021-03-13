@@ -41,6 +41,7 @@ class Run(Base):
         session.add(Run(id=random.randrange(0, 100000000), runtime=runtime, timestamp=datetime.datetime.now(),
                         testcase=testcase, testcase_hash=testcase_hash, codebase_hash=codebase_hash,
                         note=note, **machine))
+        session.commit()
 
 
 def db_connect(config):
