@@ -1,6 +1,7 @@
 import random
 import datetime
 from typing import Optional
+import ssl
 
 import sqlalchemy.ext.declarative
 import sqlalchemy.orm
@@ -47,7 +48,15 @@ class Run(Base):
 def db_connect(config):
     global session
     if session is None:
-        engine = sqlalchemy.create_engine(config['database'])
+        connect_args = {}
+        if 'database_ssl_param' in config or 'database_ssl_rootcrt' in config or 'database_ssl_clientcrt' in config or 'database_ssl_clientkey' in config:
+            if 'database_ssl_param' not in config or 'database_ssl_rootcrt' not in config or 'database_ssl_clientcrt' not in config or 'database_ssl_clientkey' not in config:
+                raise ValueError("Must provide all database ssl parameters or none of them")
+            ssl_context = ssl.create_default_context(cafile=config['database_ssl_rootcrt'])
+            ssl_context.load_cert_chain(certfile=config['database_ssl_clientcrt'], keyfile=config['database_ssl_clientkey'])
+            connect_args[config['database_ssl_param']] = ssl_context
+
+        engine = sqlalchemy.create_engine(config['database'], connect_args=connect_args)
         session = sqlalchemy.orm.sessionmaker(bind=engine)()
         meta.create_all(engine)
 
