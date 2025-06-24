@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "perfharness"
+version = "1.0"
+authors = [{name = "Audrey Dutcher", email = "audrey@rhelmot.io"}]
+description = "Tool for tracking python performance regressions"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["performance", "benchmark"]
+
+dependencies = [
+	'sqlalchemy',
+	'psutil',
+	'distro; sys_platform == "linux"',
+	'parsedatetime',
+]
+requires-python = ">=3.7"
+
+[project.urls]
+Repository = "https://github.com/rhelmot/perfharness"
+
+[project.optional-dependencies]
+viz = [
+	"matplotlib",
+	"pandas",
+]
