@@ -55,7 +55,7 @@ def main(args):
     config = load_config()
     db_connect(config)
 
-    query = ex.select([Run]).where(Run.testcase.in_([os.path.basename(t) for t in args.testcase]))
+    query = ex.select(Run).where(Run.testcase.in_([os.path.basename(t) for t in args.testcase]))
     if args.since is not None:
         query = query.where(Run.timestamp >= args.since)
     if args.note is not None:

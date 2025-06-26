@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "perfharness"
-version = "1.0"
+version = "1.0.1"
 authors = [{name = "Audrey Dutcher", email = "audrey@rhelmot.io"}]
 description = "Tool for tracking python performance regressions"
 readme = "README.md"
