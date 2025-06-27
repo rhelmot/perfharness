@@ -19,6 +19,10 @@ meta = sqlalchemy.MetaData()
 Base = sqlalchemy.ext.declarative.declarative_base(metadata=meta)
 session = None  # type: Optional[sqlalchemy.orm.Session]
 
+def get_session():
+    assert session is not None
+    return session
+
 class Run(Base):
     __tablename__ = 'runs'
 
