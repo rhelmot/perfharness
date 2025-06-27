@@ -13,9 +13,8 @@ except ImportError:
     pd = None
     plt = None
 
-from .argparse_set_ops import install_set_ops
 from .config import load_config
-from .db import db_connect, db_close, Run, get_session
+from .db import db_connect, db_close, Run, get_engine
 
 def random_color():
     h, s, l = random.random(), 0.5 + random.random() / 2.0, 0.4 + random.random() / 5.0
@@ -53,7 +52,7 @@ def main(args):
         args.since = datetime(*time_struct[:6])
 
     config = load_config()
-    db_connect(config)
+    db_connect(config, create_session=False)
 
     query = ex.select(Run).where(Run.testcase.in_([os.path.basename(t) for t in args.testcase]))
     if args.since is not None:
@@ -65,7 +64,7 @@ def main(args):
     if args.host:
         query = query.where(Run.hostname.in_(args.host))
 
-    data = pd.read_sql(query, get_session())
+    data = pd.read_sql(query, get_engine())
     if data.empty:
         print("No data matched :(")
         db_close()

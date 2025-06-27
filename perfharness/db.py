@@ -1,6 +1,5 @@
 import random
 import datetime
-from typing import Optional
 import ssl
 
 import sqlalchemy.ext.declarative
@@ -17,11 +16,12 @@ except ImportError:
 
 meta = sqlalchemy.MetaData()
 Base = sqlalchemy.ext.declarative.declarative_base(metadata=meta)
-session = None  # type: Optional[sqlalchemy.orm.Session]
+session: sqlalchemy.orm.Session | None = None
+engine: sqlalchemy.engine.Engine | None = None
 
-def get_session():
-    assert session is not None
-    return session
+def get_engine():
+    assert engine is not None
+    return engine
 
 class Run(Base):
     __tablename__ = 'runs'
@@ -43,15 +43,17 @@ class Run(Base):
 
     @classmethod
     def record_test(cls, testcase, testcase_hash, runtime, codebase_hash, machine, note):
+        if session is None:
+            raise Exception("Not connected to database")
         session.add(Run(id=random.randrange(0, 100000000), runtime=runtime, timestamp=datetime.datetime.now(),
                         testcase=testcase, testcase_hash=testcase_hash, codebase_hash=codebase_hash,
                         note=note, **machine))
         session.commit()
 
 
-def db_connect(config):
-    global session
-    if session is None:
+def db_connect(config, create_session=True):
+    global session, engine
+    if engine is None:
         connect_args = {}
         if 'database_ssl_param' in config or 'database_ssl_rootcrt' in config or 'database_ssl_clientcrt' in config or 'database_ssl_clientkey' in config:
             if 'database_ssl_param' not in config or 'database_ssl_rootcrt' not in config or 'database_ssl_clientcrt' not in config or 'database_ssl_clientkey' not in config:
@@ -61,11 +63,15 @@ def db_connect(config):
             connect_args[config['database_ssl_param']] = ssl_context
 
         engine = sqlalchemy.create_engine(config['database'], connect_args=connect_args)
+    if session is None and create_session:
         session = sqlalchemy.orm.sessionmaker(bind=engine)()
         meta.create_all(engine)
 
 def db_close():
     global session
+    if session is None:
+        return
+
     session.commit()
     session.close()
     session = None
